@@ -1,8 +1,8 @@
 """Public SEPP / goods.go.kr product evidence, resumable and rate limited.
 
 Only collect public catalog fields. Never use portal footer business numbers.
-The default is a disclosed first batch, not an exhaustive catalog snapshot.
-Increase --sepp-pages / --goods-pages to extend coverage; --refresh refetches cache.
+By default every listed page of every source category is collected (0 = all pages).
+Pass --sepp-pages / --goods-pages to cap a quick batch; --refresh refetches cache.
 """
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -25,6 +25,12 @@ OUT = ROOT / 'data/offers'
 DAY = datetime.now().date().isoformat()
 LOCK = threading.Lock()
 NEXT = {}
+INTERVAL = .35
+# 꿈드래 상품 대분류: (메뉴 번호, 대분류 코드, 이름)
+GOODS_CATEGORIES = [('1202000', '1101', '가구'), ('1203000', '1102', '사무/문구'), ('1204000', '1103', '의류/침구'),
+                    ('1205000', '1104', '식품'), ('1206000', '1105', '생활용품'), ('1207000', '1106', '일회용품'),
+                    ('1208000', '1107', '인쇄/광고'), ('1209000', '1108', '디지털/가전'), ('1210000', '1109', '시설/설비'),
+                    ('1211000', '1110', '공예'), ('1212000', '1111', '화훼'), ('1213000', '1112', '서비스')]
 
 
 def clean(s):
@@ -46,10 +52,10 @@ def fetch(url, refresh=False):
         except (ValueError, KeyError):
             pass  # A partial cache write must not make every later retry fail.
     host = urlparse(url).hostname
-    for attempt in range(3):
+    for attempt in range(5):
         with LOCK:
             wait = max(0, NEXT.get(host, 0) - time.monotonic())
-            NEXT[host] = time.monotonic() + wait + .35
+            NEXT[host] = time.monotonic() + wait + INTERVAL
         time.sleep(wait)
         try:
             with urlopen(Request(url, headers={'User-Agent': 'Mozilla/5.0 (compatible; SupplierDirectory/1.0)', 'Accept': 'text/html'}), timeout=35) as r:
@@ -62,7 +68,7 @@ def fetch(url, refresh=False):
             temp.replace(path)
             return BeautifulSoup(html, 'html.parser'), DAY
         except Exception:
-            if attempt == 2:
+            if attempt == 4:
                 raise
             time.sleep(2 ** attempt)
 
@@ -135,26 +141,30 @@ def listing(soup, source):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--sepp-pages', type=int, default=50)
-    parser.add_argument('--goods-pages', type=int, default=55)
+    parser.add_argument('--sepp-pages', type=int, default=0, help='0 = all pages')
+    parser.add_argument('--goods-pages', type=int, default=0, help='0 = all pages')
+    parser.add_argument('--goods-categories', default='', help='comma separated names, empty = all')
+    parser.add_argument('--interval', type=float, default=INTERVAL, help='seconds between requests per host')
     parser.add_argument('--refresh', action='store_true')
     args = parser.parse_args()
+    globals()['INTERVAL'] = args.interval
+    wanted = {c.strip() for c in args.goods_categories.split(',') if c.strip()}
     OUT.mkdir(parents=True, exist_ok=True)
-    groups = [('sepp', '가치장터 인기 상품', None),
-              ('goods', '인쇄/광고', '1208000'), ('goods', '서비스', '1213000')]
+    groups = [('sepp', '가치장터 인기 상품', None, None)] + [
+        ('goods', name, menu, code) for menu, code, name in GOODS_CATEGORIES if not wanted or name in wanted]
     jobs, coverage, failures = {}, [], []
-    for source, label, menu in groups:
-        seed = 'https://www.sepp.or.kr/main/sclentIntrGdsLst' if source == 'sepp' else f'https://www.goods.go.kr/pp/index.do?menuNo={menu}'
+    for source, label, menu, category in groups:
+        # 꿈드래 분류 첫 화면(index.do)은 무겁고 자주 끊겨서 목록 URL을 직접 씁니다.
+        goods_list = lambda offset: (f'https://www.goods.go.kr/pp/pd/product/list.do?menuNo={menu}&condition.pageType=D'
+                                     f'&condition.goodsLclasCode={category}&maxPageItems=10&pagerOffset={offset}')
+        seed = 'https://www.sepp.or.kr/main/sclentIntrGdsLst' if source == 'sepp' else goods_list(0)
         soup, observed = fetch(seed, args.refresh)
         ids, total = listing(soup, source)
         limit = args.sepp_pages if source == 'sepp' else args.goods_pages
-        pages = min(limit, math.ceil(total / 10))
-        if source == 'goods':
-            category = soup.select_one('input[name="condition.goodsLclasCode"]')['value']
+        pages = math.ceil(total / 10) if limit <= 0 else min(limit, math.ceil(total / 10))
         urls = []
         for page in range(2, pages + 1):
-            urls.append(f'{seed}?page={page}' if source == 'sepp' else
-                        f'https://www.goods.go.kr/pp/pd/product/list.do?menuNo={menu}&condition.pageType=D&condition.goodsLclasCode={category}&maxPageItems=10&pagerOffset={(page-1)*10}')
+            urls.append(f'{seed}?page={page}' if source == 'sepp' else goods_list((page - 1) * 10))
         seen = set(ids)
         with ThreadPoolExecutor(max_workers=4) as pool:
             futures = {pool.submit(fetch, u, args.refresh): u for u in urls}
@@ -165,8 +175,8 @@ def main():
                 except Exception as e:
                     failures.append({'source': source, 'url': futures[future], 'error': type(e).__name__})
         coverage.append({'source': source, 'label': label, 'url': seed, 'observedAt': observed,
-                         'sourceTotal': total, 'pageLimit': limit, 'listedProducts': len(seen),
-                         'scopeComplete': len(seen) == total})
+                         'sourceTotal': total, 'pageLimit': limit or pages, 'listedProducts': len(seen),
+                         'scopeComplete': len(seen) >= total})
         for code in sorted(seen):
             jobs[(source, code)] = code
         print(label, 'sourceTotal', total, 'selected', len(seen), flush=True)
@@ -180,7 +190,7 @@ def main():
                 rows.append(future.result())
             except Exception as e:
                 failures.append({'source': src, 'id': code, 'error': type(e).__name__})
-            if i % 100 == 0:
+            if i % 500 == 0:
                 print('details', i, '/', len(jobs), 'failures', len(failures), flush=True)
     rows.sort(key=lambda x: x['id'])
     if not rows:
@@ -190,7 +200,8 @@ def main():
     temp = target.with_suffix('.tmp')
     temp.write_text(''.join(json.dumps(r, ensure_ascii=False) + '\n' for r in rows), encoding='utf-8')
     temp.replace(target)
-    report = {'builtAt': DAY, 'scope': 'first_batch', 'coverage': coverage, 'selectedProducts': len(jobs),
+    scope = 'all_listed' if all(c['scopeComplete'] for c in coverage) else 'partial'
+    report = {'builtAt': DAY, 'scope': scope, 'coverage': coverage, 'selectedProducts': len(jobs),
               'collectedProducts': len(rows), 'failures': failures}
     (OUT / 'collection-report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps({k:v for k,v in report.items() if k != 'coverage'}, ensure_ascii=False), flush=True)

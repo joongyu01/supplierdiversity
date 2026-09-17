@@ -18,6 +18,31 @@ def join_offers(offers, registry):
     return sorted(businesses.values(), key=lambda b: (not bool(b['masks'][0]), b['name'], b['bizno']))
 
 
+PRODUCT_URL = {'goods': 'https://www.goods.go.kr/pp/pd/product/view.do?goodsCode={}&menuNo=1205000',
+               'sepp': 'https://www.sepp.or.kr/goods/value/prdctDtl?goodsNo={}'}
+
+
+def compact(businesses):
+    """Publish contacts once per business and offers as [id, title, category, observedAt, contact].
+
+    site/offers.js restores the original offer fields; the product URL is rebuilt from the source ID.
+    """
+    result = []
+    for b in businesses:
+        contacts, index, offers = [], {}, []
+        for o in b['offers']:
+            source, code = o['id'].split(':', 1)
+            if o['url'] != PRODUCT_URL[source].format(code):
+                raise ValueError('Product URL does not match its source ID: ' + o['id'])
+            key = (source, o.get('supplier', ''), o.get('phone', ''), o.get('address', ''), o.get('sellerUrl', ''))
+            if key not in index:
+                index[key] = len(contacts)
+                contacts.append(dict(zip(('source', 'supplier', 'phone', 'address', 'sellerUrl'), key)))
+            offers.append([o['id'], o['title'], o.get('category', ''), o['observedAt'], index[key]])
+        result.append({'bizno': b['bizno'], 'name': b['name'], 'masks': b['masks'], 'contacts': contacts, 'offers': offers})
+    return result
+
+
 def main():
     path = ROOT / 'data/offers'
     offers = [json.loads(line) for line in (path / 'public-offers.jsonl').read_text(encoding='utf-8').splitlines() if line]
@@ -39,7 +64,8 @@ def main():
                    'unmatchedProducts': sum(not bool(registry.get(r['bizno'])) for r in offers),
                    'businessesWithUnverifiedIdentity': sum(not bool(b['bizno']) for b in businesses),
                    'byType': {label: sum(bool(b['masks'][0] & (1 << i)) for b in businesses) for i, label in enumerate(manifest['labels'])}})
-    data = {'labels': manifest['labels'], 'report': report, 'businesses': businesses}
+    data = {'schemaVersion': 2, 'productUrl': PRODUCT_URL, 'labels': manifest['labels'], 'report': report,
+            'businesses': compact(businesses)}
     (ROOT / 'site/data/offers.json').write_text(json.dumps(data, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
     (path / 'join-report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps({k:v for k,v in report.items() if k not in ('coverage','failures')}, ensure_ascii=False, indent=2))

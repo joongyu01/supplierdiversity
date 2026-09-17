@@ -56,6 +56,20 @@ class OfferEvidenceTests(unittest.TestCase):
         self.assertEqual(rows[0]['name'], '등록기업')
         self.assertEqual(len(rows[0]['offers']), 2)
 
+    def test_compact_output_keeps_contacts_and_rebuilds_urls(self):
+        offers = [{'id': 'goods:25002830', 'source': 'goods', 'title': '화훼', 'category': '화훼', 'bizno': '1234567890',
+                   'supplier': '시설', 'phone': '02-1', 'address': '서울', 'observedAt': '2026-09-17',
+                   'url': builder.PRODUCT_URL['goods'].format('25002830')},
+                  {'id': 'goods:25002831', 'source': 'goods', 'title': '화분', 'category': '화훼', 'bizno': '1234567890',
+                   'supplier': '시설', 'phone': '02-1', 'address': '서울', 'observedAt': '2026-09-17',
+                   'url': builder.PRODUCT_URL['goods'].format('25002831')}]
+        rows = builder.compact(builder.join_offers(offers, {}))
+        self.assertEqual(len(rows[0]['contacts']), 1)
+        self.assertEqual(rows[0]['offers'][1], ['goods:25002831', '화분', '화훼', '2026-09-17', 0])
+        offers[1]['url'] = 'https://example.com/'
+        with self.assertRaises(ValueError):
+            builder.compact(builder.join_offers(offers, {}))
+
 
 if __name__ == '__main__':
     unittest.main()

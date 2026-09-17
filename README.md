@@ -52,11 +52,13 @@ python scripts/build_registry_site.py
 ### 2. 품목으로 찾기 (`site/data/offers.json`)
 
 ```powershell
-python scripts/collect_offers.py        # --sepp-pages, --goods-pages 로 범위 확장, --refresh 로 재수집
+python scripts/collect_offers.py        # 가치장터 + 꿈드래 12개 대분류의 공개 목록 전체 (약 3만 요청, 2~3시간)
 python scripts/build_offers_site.py
 ```
 
-2026-09-14 1차 수집 1,571개 상품·서비스 중 1,566개가 명단의 386개 사업장에 연결됐습니다. 원본 HTML 캐시는 `private/offer-cache/`, 정규화 원본은 `data/offers/`에 둡니다.
+API가 아니라 공개 상품 페이지를 읽습니다. 가치장터는 상품 상세 → 판매기업 소개의 사업자번호, 꿈드래는 상품 상세의 시설 사업자번호로만 명단과 연결합니다. 호스트별 요청 간격(`--interval`, 기본 0.35초), 재시도, 응답 캐시(`private/offer-cache/`)를 쓰므로 중단돼도 다시 실행하면 이어서 받습니다. 빠른 확인은 `--sepp-pages 1 --goods-pages 1 --goods-categories 화훼`, 최신 원문 재수집은 `--refresh`.
+
+`site/data/offers.json`(schemaVersion 2)은 연락처를 업체당 한 번만 싣고 상품은 `[id, 상품명, 분류, 확인일, 연락처 번호]`로 압축합니다. 상품 URL은 ID로 복원합니다. 정규화 원본과 수집 보고서는 `data/offers/`(git 미추적)에 둡니다.
 
 ### 3. 쇼핑몰 단가 카탈로그 (`site/data/catalog.json`, `site/data/chunks/`)
 

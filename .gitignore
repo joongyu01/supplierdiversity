@@ -16,3 +16,4 @@ api key.txt
 *.csv
 data/raw/
 .claude/
+data/offers/

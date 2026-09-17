@@ -31,9 +31,9 @@ function render(reset=true){
  const params=new URLSearchParams();if($('category').value)params.set('category',$('category').value);if($('subcategory').value)params.set('item',$('subcategory').value);if($('q').value)params.set('q',$('q').value);history.replaceState(null,'',location.pathname+(params.size?'?'+params.toString():''));
 }
 async function load(){try{
- const r=await fetch('./data/offers.json');if(!r.ok)throw Error('판매정보 파일을 받지 못했습니다');data=await r.json();
+ const r=await fetch('./data/offers.json');if(!r.ok)throw Error('판매정보 파일을 받지 못했습니다');data=await r.json();if(data.schemaVersion===2)for(const b of data.businesses)b.offers=b.offers.map(([id,title,category,observedAt,c])=>{const [source,code]=id.split(':'),k=b.contacts[c]||{};return {id,source,title,category,observedAt,supplier:k.supplier,phone:k.phone,address:k.address,sellerUrl:k.sellerUrl,url:data.productUrl[source].replace('{}',code)};});
  const p=data.report;$('summary').textContent=`연결 업체 ${num(p.matchedBusinesses)}곳 · 연결 상품 ${num(p.matchedProducts)}건`;
- $('coverage').textContent=`${p.builtAt} 1차 수집: ${num(p.collectedProducts)}개 상품·서비스. 기존 명단에 연결되지 않은 ${num(p.unmatchedProducts)}건은 기본 검색에서 제외합니다. 전체 44만 업체의 판매품목을 확보한 것은 아닙니다.`;
+ $('coverage').textContent=`${p.builtAt} 수집${p.scope==='all_listed'?'(가치장터·꿈드래 공개 목록 전체)':'(일부 범위)'}: ${num(p.collectedProducts)}개 상품·서비스. 기존 명단에 연결되지 않은 ${num(p.unmatchedProducts)}건은 기본 검색에서 제외합니다. 전체 44만 업체의 판매품목을 확보한 것은 아닙니다.`;
  for(const id of ['q','submit','type','extra','status','source','pending','reset','category','subcategory','category-search'])$(id).disabled=false;
  for(const id of ['type','extra'])$(id).innerHTML=`<option value="-1">${id==='type'?'전체 유형':'선택 안 함'}</option>`+data.labels.map((l,i)=>`<option value="${i}">${esc(l)}</option>`).join('');
  $('source-details').innerHTML=`<p>명단 기준일 ${esc(p.registryBuiltAt)} · 수집 오류 ${p.failures.length}건 · 사업자번호 미확인 판매자 ${p.businessesWithUnverifiedIdentity}곳</p><table><thead><tr><th>수집 범위</th><th>원본 목록</th><th>이번 수집 대상</th><th>목록 확보</th></tr></thead><tbody>${p.coverage.map(c=>`<tr><td><a href="${safeLink(c.url)}" target="_blank" rel="noopener">${esc(c.label)} ↗</a></td><td>${num(c.sourceTotal)}</td><td>${num(c.listedProducts)}</td><td>${c.scopeComplete?'해당 범위 전체':'일부'}</td></tr>`).join('')}</tbody></table><p>상품별 확인일은 원문을 실제 수집한 날짜입니다. 수집 범위 밖의 상품·업체는 결과에 포함되지 않을 수 있습니다.</p>`;
