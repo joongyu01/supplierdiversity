@@ -29,9 +29,9 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add site/data/catalog.json
+          git add site/data/registered-products.json
           if ! git diff --cached --quiet; then
-            git commit -m 'data: update procurement catalog'
+            git commit -m 'data: update registered supplier products'
             git push
           fi
       - uses: actions/configure-pages@v5

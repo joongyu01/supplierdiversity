@@ -137,7 +137,7 @@ def main():
         raise ValueError('DATA_GO_KR_SERVICE_KEY 환경변수 또는 GitHub Actions Secret이 필요합니다.')
     suppliers = json.loads((ROOT / 'config/suppliers.json').read_text(encoding='utf-8-sig'))
     catalog = build_catalog(suppliers, key)
-    destination = ROOT / 'site/data/catalog.json'
+    destination = ROOT / 'site/data/registered-products.json'
     temporary = destination.with_suffix('.tmp')
     temporary.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     temporary.replace(destination)

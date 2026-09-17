@@ -1,82 +1,111 @@
-# 구매이음 · Supplier Diversity 02
+# 구매이음 · Supplier Diversity
 
-한국석유관리원 구매 담당자가 우선구매 대상 8개 유형의 사업장을 업체명·사업자번호로 조회하는 별도 버전입니다.
+공공기관 구매 담당자가 우선구매 대상 기업을 **① 누구인지(사업장 명단) → ② 무엇을 파는지(품목) → ③ 얼마에 살 수 있는지(종합쇼핑몰 계약단가)** 까지 한 사이트에서 확인하는 도구입니다.
 
-- [업체 검색 화면](https://joongyu01.github.io/supplier_diversity_2/)
-- [품목으로 업체 찾기](https://joongyu01.github.io/supplier_diversity_2/offers.html)
-- [인증 변경 공고](https://joongyu01.github.io/supplier_diversity_2/cancellations.html)
+`joongyu01/supplier_diversity`(종합쇼핑몰 우대기업 물품 카탈로그)와 `joongyu01/supplier_diversity_2`(구매이음 사업장 명단·품목 검색)를 합친 저장소입니다. 두 저장소의 커밋 이력은 모두 보존되어 있습니다.
 
-## 확정 범위
+- 웹사이트: https://joongyu01.github.io/supplierdiversity/
 
-관리 대상은 중소기업·여성기업·장애인기업·창업기업·중증장애인생산품 생산시설·장애인표준사업장·인증 사회적기업·사회적협동조합의 8개 사업장 유형입니다. 사업자등록번호로 관리하고, 한 사업장에 여러 유형의 자격을 함께 보관합니다.
+## 화면
 
-전체 사업장 명단 조회와 공개 상품·서비스를 통한 업체 검색을 제공합니다. 녹색제품·기술개발제품 등 제품별 인증의 수집·판정·관리는 이 프로젝트 범위에 포함하지 않습니다. 생산품목과 사업내용은 업체 탐색에 사용합니다.
+| 화면 | 파일 | 하는 일 | 원래 저장소 |
+|---|---|---|---|
+| 사업장 명단 (홈) | `site/index.html` | 8개 유형 44만 사업자번호를 업체명·사업자번호로 조회, 유형·기간·취소 이력과 연락처 | supplier_diversity_2 |
+| 품목으로 찾기 | `site/offers.html` | 가치장터·꿈드래 공개 상품·서비스로 업체 찾기, 사업자번호로 명단 연결 | supplier_diversity_2 |
+| 쇼핑몰 단가 카탈로그 | `site/catalog.html` | 나라장터 종합쇼핑몰 품명별 우대기업 품목·규격·계약단가, CSV, 중증 생산시설 생산품목 | supplier_diversity |
+| 인증 변경 공고 | `site/cancellations.html` | 고용노동부 관서의 사회적기업 인증취소·반납 공고 (매일 수집) | 공통 |
+| 이전 검색 화면 | `site/product-search.html` | 구 품목 검색·검토목록 (보존) | supplier_diversity_2 |
 
-2026-09-14 SMPP 중소기업 확인서 337,692건(고유 사업자번호 337,436개)을 확보했습니다. 전국 조회 대비 3,180건은 미확보로 표시합니다. 기존 7개 유형과 합친 고유 사업자번호는 444,147개이며 과거·만료·취소 이력도 포함합니다.
+모든 화면은 같은 상단 메뉴로 이어집니다. 카탈로그와 품목 검색의 업체 옆 **사업장 명단·인증 이력 →** 링크는 `./?q=<사업자번호>`로 명단 화면을 열어, 쇼핑몰 자료에 없는 유형·만료·취소 기록까지 확인하게 합니다.
 
-## 주요 기능
+## 공통 원칙
 
-- 업체명·원본의 다른 업체명·사업자번호 검색 (하이픈 입력 지원)
-- 8개 사업장 유형과 추가 유형의 교차 필터
-- 기록된 기간 내 / 기간 정보 부족 / 만료·시작 전 / 취소 이력 구분
-- 대표자명, 사업장 연락처, 상세주소와 유형별 원본·기간 확인
-- Web Worker 검색, 분할 색인, 상세 자료 필요 시 로딩
-- 인증 변경 공고 수집은 기존 GitHub Actions 유지
-- 가치장터·꿈드래의 상품·서비스 검색 → 사업자번호가 일치하는 업체와 유형·연락처 확인
+- **사업자등록번호로만 결합합니다.** 업체명·대표자 이름 유사도로 합치지 않습니다.
+- **가공하지 않습니다.** 원본이 없으면 빌드를 중단하고, 수집하지 않은 품목·가격을 채우지 않습니다. 수집 누락을 미판매로 판단하지 않습니다.
+- **사업자등록 공개정보는 싣습니다.** 대표자·사업장 주소·전화는 구매 담당자의 확인·연락·방문용입니다. 담당자 개인 이메일·휴대전화는 싣지 않습니다.
+- ‘기록된 기간 내’, 단가, 계약기간은 수집·생성 시점 값입니다. 발주 전 나라장터와 원문에서 확인하세요.
+- 인증키, 원본 Excel, `data/raw/`, `private/`는 저장소에 넣지 않습니다.
 
-## 실제 자료 범위
+자료별 출처·건수·한계는 [docs/data-sources.md](docs/data-sources.md), 조달청 API 실호출 기록은 [docs/api-notes.md](docs/api-notes.md), 공고 봇은 [docs/cancellation-monitor.md](docs/cancellation-monitor.md)에 있습니다.
 
-통합 444,147개 사업자번호. 중소기업 337,436개, 여성기업 104,516개, 장애인기업 11,276개, 창업기업 64,511개, 중증장애인생산품 생산시설 826개, 장애인표준사업장 1,217개, 사회적기업 6,127개, 사회적협동조합 4,980개입니다. 유형별 중복이 있습니다.
+## 설치와 확인
 
-중소기업은 SMPP 2026-09-14 공공기관 입찰용·유효 필터, 사회적기업은 2026-07-14 누적 명단, 다른 유형은 제공받은 2026-06-30 정부권장정책 자료입니다. '기록된 기간 내'는 생성일의 날짜 대조이며 실시간 유효 인증을 보증하지 않습니다. 취소 기록은 별도로 보존합니다.
-
-전국 340,872건과 다운로드 337,692건의 차이 3,180건은 미확보입니다. 소상공인 전국 조회와 선택 가능한 16개 시도의 합계가 달라 발생했으며 원인은 미확인입니다.
-
-메인 화면은 업체 명단, `offers.html`은 공개 판매정보로 업체를 찾는 화면입니다. 기존 품목 검색·검토목록 화면은 `product-search.html`에 보존했습니다. 제품별 인증은 프로젝트 범위 밖입니다.
-
-## 상품·서비스 연결
-
-2026-09-14 1차 수집 결과는 1,571개 상품·서비스이며, 이 중 1,566개가 기존 명단의 386개 사업장에 연결됐습니다. 미연결 상품은 5개이고 처리 실패는 없습니다.
-
-1차 수집 범위는 가치장터 인기 상품 목록의 처음 50페이지와 꿈드래 인쇄/광고·서비스 목록의 각각 처음 55페이지입니다. 전체 44만 업체의 판매품목을 확보한 것이 아니며, 상품 수집 누락을 미판매로 판단하지 않습니다. 원본 전체 건수·수집 대상·성공·실패·연결 건수는 화면의 수집 범위와 `site/data/offers.json`의 `report`에 기록합니다. 목록은 수집 도중 순서나 건수가 바뀔 수 있으며 원본 상품 ID로 중복을 제거합니다.
-
-- 꿈드래: 상품 상세의 시설정보에서 사업자번호·연락처·주소를 추출합니다.
-- 가치장터: 상품 상세가 가리키는 판매기업 소개의 사업자번호·연락처·주소를 추출합니다.
-- 사이트 운영사 번호, 업체명 유사도, 업종 추측으로 연결하지 않습니다. 판매 사이트의 인증 배지를 사업장 자격으로 옮기지 않습니다.
-- 기존 명단에 연결되지 않은 상품은 기본 검색에서 제외하고, 사용자가 미연결 판매자 보기를 선택할 때 유형 미확인 상태로 표시합니다.
-- 상품마다 원문 링크와 실제 수집일을 보존합니다. 가격·재고·현재 납품 가능 여부는 별도 확인이 필요합니다.
-
-```powershell
-python scripts/collect_offers.py
-python scripts/build_offers_site.py
-```
-
-수집기는 호스트별 요청 간격과 4개 작업 스레드, 재시도, 응답 캐시를 사용합니다. 재실행은 캐시로 이어서 처리합니다. `--sepp-pages`와 `--goods-pages`를 늘리면 수집 범위를 확장할 수 있으며, 최신 원문을 다시 받아야 할 때 `--refresh`를 사용합니다. 원본 HTML 캐시는 `private/offer-cache/`, 정규화 원본과 검증 보고서는 `data/offers/`에 저장하고 공개 저장소에는 최소 상품·연락처 필드와 출처를 담은 `site/data/offers.json`을 배포합니다.
-
-## 공개 사업장 정보
-
-대표자명·사업장 연락처·상세주소는 구매 담당자의 업체 확인·연락·방문을 위해 **수집하고 표시합니다**. 이 항목들을 일괄 수집 금지하지 않습니다. 원본에 없는 정보는 추정하지 않고, 생산시설장은 대표자와 구분하여 표시합니다. 자료 결합은 사업자등록번호 기준이며 대표자 이름이나 동명 업체만으로 합치지 않습니다.
-
-인증키와 원본 Excel은 저장소에 포함하지 않습니다. JSON에는 출처, 기준일, 원본 SHA-256, 생성일을 기록합니다. 자세한 범위는 [자료 설명](docs/data-sources.md)을 참고하세요.
-
-## 실행 및 갱신
-
-Python 3.10 이상에서:
+Python 3.10 이상.
 
 ```powershell
 python -m pip install -r requirements.txt
-python scripts/build_directory.py --social "private/sources/social-enterprises-2026-2.xlsx" --policy "2026년 6월 30일 기준 정부권장정책.xlsx"
-python scripts/build_registry_site.py
-python -m http.server 8000 --directory site
+python -m unittest discover -s tests -v
+python -m http.server 8000 --directory site   # http://localhost:8000
 ```
 
-`http://localhost:8000`에서 확인합니다. 새 Excel의 시트·열 구조가 바뀌면 수집기를 함께 검토해야 합니다.
+## 자료 갱신
+
+### 1. 사업장 명단 (`site/data/directory.json`, `site/data/registry/`)
 
 ```powershell
-python -m unittest discover -s tests -v
-node --check site/directory.js
+python scripts/build_directory.py --social "private/sources/social-enterprises-2026-2.xlsx" --policy "2026년 6월 30일 기준 정부권장정책.xlsx"
+python scripts/build_registry_site.py
 ```
 
-`main` push 시 Pages에 배포됩니다. 공고 봇은 전체 관서 수집 성공 시에만 JSON을 교체하며, 일부 실패 시 이전 결과를 유지합니다. 청문·사전통지·예비사회적기업 공고는 인증취소와 구분하고, 공고만으로 업체 상태를 자동 변경하지 않습니다. [공고 봇 운영 문서](docs/cancellation-monitor.md)
+중소기업은 SMPP 2026-09-14 확인서 337,692건(`scripts/import_smpp_sme.py`), 사회적기업은 2026-07-14 누적 명단, 나머지는 2026-06-30 정부권장정책 자료입니다. 통합 고유 사업자번호 444,147개이며 과거·만료·취소 이력을 포함합니다. SMPP 전국 조회 대비 3,180건은 미확보입니다.
 
-기존 API 수집기 `scripts/collect.py`는 별도 탐색용으로 남아 있으며 새 검색 화면은 `site/data/directory.json`을 사용합니다. 이전 저장소와 독립적으로 배포됩니다.
+### 2. 품목으로 찾기 (`site/data/offers.json`)
+
+```powershell
+python scripts/collect_offers.py        # --sepp-pages, --goods-pages 로 범위 확장, --refresh 로 재수집
+python scripts/build_offers_site.py
+```
+
+2026-09-14 1차 수집 1,571개 상품·서비스 중 1,566개가 명단의 386개 사업장에 연결됐습니다. 원본 HTML 캐시는 `private/offer-cache/`, 정규화 원본은 `data/offers/`에 둡니다.
+
+### 3. 쇼핑몰 단가 카탈로그 (`site/data/catalog.json`, `site/data/chunks/`)
+
+```
+config/product_names.txt        기관이 실제 구매하는 품명 목록
+        │  scripts/collect_shopmall.py — 품명별 2026년 등록분 수집
+        ▼
+data/raw/shopmall/<품명>.csv     원시 응답 (git 미추적)
+        │  scripts/collect_suppliers.py — 등장 업체의 대표자·주소·전화
+data/raw/suppliers.csv
+        │  scripts/build_catalog.py — 정부권장정책 엑셀 사업자번호와 대조
+        ▼
+site/data/catalog.json          업체 + 품명 인덱스 + 중증 생산시설 (초기 로드)
+site/data/chunks/<품명>.json     품목 상세 (품명 선택 시 로드)
+```
+
+```powershell
+$env:DATA_GO_KR_SERVICE_KEY = "발급받은 키"   # 공공데이터포털 15129471 활용신청
+python scripts/collect_shopmall.py            # 이미 있는 품명 파일은 건너뜀
+python scripts/collect_shopmall.py 프로젝터 UPS
+python scripts/collect_suppliers.py
+python scripts/build_catalog.py               # 엑셀 원본이 저장소 루트에 있어야 함
+```
+
+종합쇼핑몰 API는 등록·변경 이벤트 피드라 전체 수집은 월 10~19만 건입니다. 품명 필터로 필요한 품명만 받습니다(하루 1,000회 한도).
+
+### 4. 인증 변경 공고 (`site/data/cancellation-notices.json`)
+
+GitHub Actions `watch-cancellations.yml`이 매일 08:23(KST) 실행합니다. 전체 관서 수집에 성공할 때만 JSON을 교체하고, 공고만으로 업체 상태를 바꾸지 않습니다. 수동 실행: `python scripts/watch_cancellations.py` (`requirements-cancellation.txt`).
+
+### 보조: 지정 업체 등록 물품 (`scripts/collect.py`)
+
+`config/suppliers.json`의 업체를 사용자정보 API로 조회해 `site/data/registered-products.json`에 저장합니다. 화면에서는 쓰지 않는 탐색용이며, 카탈로그의 `catalog.json`을 덮어쓰지 않도록 출력 파일을 분리했습니다. GitHub Actions `collect.yml`(수동 실행)이 이 스크립트를 돌립니다.
+
+## 구조
+
+```text
+site/                          GitHub Pages 정적 사이트 (main push 시 배포)
+  index.html  registry.js registry-worker.js registry.css directory.css   사업장 명단
+  offers.html offers.js offers.css purchase-categories.js                  품목으로 찾기
+  catalog.html app.js styles.css                                           쇼핑몰 단가 카탈로그
+  cancellations.html cancellations.js                                      인증 변경 공고
+  product-search.html directory.js                                         이전 검색 화면
+  data/                        directory.json registry/ offers.json catalog.json chunks/ summary.json cancellation-notices.json
+config/                        product_names.txt suppliers.json cancellation-sources.json
+scripts/                       build_directory · build_registry_site · import_smpp_sme · extract/package_business_registries
+                               collect_offers · build_offers_site
+                               collect_shopmall · collect_suppliers · build_catalog
+                               watch_cancellations · collect
+tests/                         test_directory · test_offers · test_mall_catalog · test_collect · test_cancellations
+docs/                          data-sources · api-notes · cancellation-monitor
+```

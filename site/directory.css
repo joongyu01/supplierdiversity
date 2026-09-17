@@ -5,3 +5,5 @@
 .contact-line{font-size:13px;color:#51625d;margin:5px 0;overflow-wrap:anywhere}.review-row small{display:block;color:#66756f;margin-top:6px}#source-details table{width:100%;border-collapse:collapse}#source-details td,#source-details th{padding:10px;border-bottom:1px solid #dde5e1;text-align:left}dialog table{width:100%;table-layout:fixed}dialog th{width:100px}dialog td{overflow-wrap:anywhere}
 
 .type-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.type-tab{min-width:0;word-break:keep-all}.type-tab span{font-size:18px}
+
+.topbar nav a[aria-current="page"]{color:var(--green);font-weight:700}@media(max-width:760px){.topbar{flex-wrap:wrap}.topbar nav{flex-wrap:wrap;gap:6px 12px;margin-left:0}.topbar nav a:first-child{display:inline}}
