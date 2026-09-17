@@ -11,6 +11,9 @@ on:
       goods_categories:
         description: '꿈드래 분류 (쉼표 구분, 비우면 12개 전체)'
         default: ''
+      workers:
+        description: '동시 요청 스레드 (요청 간격은 유지)'
+        default: '24'
       publish:
         description: '수집 결과를 커밋하고 배포'
         type: boolean
@@ -56,6 +59,7 @@ jobs:
           --sepp-pages '${{ inputs.sepp_pages }}'
           --goods-pages '${{ inputs.goods_pages }}'
           --goods-categories '${{ inputs.goods_categories }}'
+          --workers '${{ inputs.workers }}'
       - name: Save response cache
         if: always()
         uses: actions/cache/save@v4

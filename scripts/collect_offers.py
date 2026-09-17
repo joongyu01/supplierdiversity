@@ -145,6 +145,8 @@ def main():
     parser.add_argument('--goods-pages', type=int, default=0, help='0 = all pages')
     parser.add_argument('--goods-categories', default='', help='comma separated names, empty = all')
     parser.add_argument('--interval', type=float, default=INTERVAL, help='seconds between requests per host')
+    parser.add_argument('--workers', type=int, default=4,
+                        help='동시 요청 스레드. 요청 간격은 그대로 지켜지므로 초당 요청 수는 --interval 이 정합니다.')
     parser.add_argument('--refresh', action='store_true')
     args = parser.parse_args()
     globals()['INTERVAL'] = args.interval
@@ -166,7 +168,7 @@ def main():
         for page in range(2, pages + 1):
             urls.append(f'{seed}?page={page}' if source == 'sepp' else goods_list((page - 1) * 10))
         seen = set(ids)
-        with ThreadPoolExecutor(max_workers=4) as pool:
+        with ThreadPoolExecutor(max_workers=args.workers) as pool:
             futures = {pool.submit(fetch, u, args.refresh): u for u in urls}
             for future in as_completed(futures):
                 try:
@@ -179,9 +181,10 @@ def main():
                          'scopeComplete': len(seen) >= total})
         for code in sorted(seen):
             jobs[(source, code)] = code
-        print(label, 'sourceTotal', total, 'selected', len(seen), flush=True)
+        print(label, 'sourceTotal', total, 'selected', len(seen), 'listPageFailures',
+              sum(f.get('source') == source and 'url' in f for f in failures), flush=True)
     rows = []
-    with ThreadPoolExecutor(max_workers=4) as pool:
+    with ThreadPoolExecutor(max_workers=args.workers) as pool:
         futures = {pool.submit(sepp_detail if src == 'sepp' else goods_detail, code, args.refresh): (src, code)
                    for src, code in jobs}
         for i, future in enumerate(as_completed(futures), 1):
