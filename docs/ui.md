@@ -12,3 +12,7 @@
 - Do not remove HTML entry points, requirements files, or collection configuration when updating collectors. These were restored unchanged from commit `9c42607` where applicable after their removal in `5331f07` broke deployment. HTML was then restyled.
 
 Validation: desktop and mobile flows for category selection, search, URL restoration, clearing individual filters, real business details, catalog selection, notice search, asset loading and console errors. Screenshots and browser check scripts stay under ignored `private/ui/`.
+
+Brand asset: `site/assets/kpetro-logo-transparent.png` is the transparent header variant of the preserved original `kpetro-logo.png`, edited with the built-in image generation tool. Edit brief: remove the white background, preserve the original K-Petro symbol, Korean lettering, proportions, and gray/green colors; use PNG alpha with no white matte. The header uses normal compositing.
+
+The offers category column and every page footer display “© 2026 Joongyu Shin. All rights reserved.” and “Developed by Joongyu Shin.” The credit sits below the category card, outside its scroll area.
