@@ -5,7 +5,7 @@
 - Keep business-list collection and generated files under `site/data/` separate from UI edits.
 - Offers support category buttons, classification search, supplier filters, removable filter chips, and URL restoration of selected filters.
 - The home page is the offer finder; navigation then leads to contract prices, businesses.html, and certification notices. Internal business-number links explicitly target businesses.html.
-- Catalog buttons display all distinct collected item names, with a local name filter and exact-name results across every matching data chunk.
+- Catalog buttons include all distinct collected item names. The default view shows one responsive row with an expand/collapse button; searching reveals every matching name. Exact-name results span every matching data chunk.
 - Offer data arrives in a small bootstrap and hash-named batches. Registry search uses each completed index group. Partial results must never claim that no supplier exists.
 - Current-status dialogs hand off to official lookup services and clearly state that they do not automatically validate certifications.
 - Internal ERP source files, derived records, and purchase amounts/counts/shares/rankings must never enter public assets. Only general category names may be reused. Displayed supplier/product coverage is from the public datasets.

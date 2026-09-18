@@ -1383,7 +1383,11 @@ dialog::backdrop {
 .page-catalog .stats article {
   border-right:1px solid #fff;
 }
-/* All collected item names remain visible; the search only narrows them. */
+/* Show one responsive row by default; expansion and search reveal all matching names. */
+.catalog-name-toolbar {display:flex;align-items:flex-end;gap:16px;justify-content:space-between;margin-bottom:16px;}
+.catalog-name-field {flex:1;max-width:520px;min-width:0;}
+.catalog-name-toolbar #catalog-name-search {margin-bottom:0;}
+#toggle-names {flex-shrink:0;min-height:44px;}
 .catalog-scope-note {color:var(--muted);font-size:12px;line-height:1.8;margin:8px 0;}
 .catalog-name-label {display:block;font-size:12px;font-weight:700;margin:16px 0 7px;}
 #catalog-name-search {width:100%;max-width:520px;margin-bottom:16px;padding:12px 14px;border:1px solid #d6e0cd;border-radius:10px;background:#fff;font:inherit;font-size:14px;color:var(--ink);}
@@ -1413,6 +1417,9 @@ dialog::backdrop {
 #official-notice-route:empty {display:none;}
 #source-report p {font-size:12px;line-height:1.8;}
 @media(max-width:650px) {
+  .catalog-name-toolbar {flex-wrap:wrap;gap:10px;}
+  .catalog-name-field {flex-basis:100%;}
+  #toggle-names {margin-left:auto;}
   .page-catalog #category-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
   .page-catalog .item-name-card {min-height:76px;padding:12px;}
   .sort-control {margin-left:0;}

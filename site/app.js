@@ -7,7 +7,7 @@ const TYPE_ORDER = ['사회적기업', '중증장애인생산품 생산시설', 
 const SHORT = { '중증장애인생산품 생산시설': '중증생산시설', '기술개발제품 시범구매': '시범구매', '사회적협동조합': '협동조합' };
 const PAGE = 25;
 
-const state = { catalog: null, chunkCache: new Map(), query: '', products: [], filtered: [], page: 1 };
+const state = { catalog: null, chunkCache: new Map(), query: '', products: [], filtered: [], page: 1, namesExpanded: false };
 
 const enterpriseTypeCount=bizno=>typesOf(bizno).filter(t=>!['기술개발제품 시범구매','자활용사촌'].includes(t)).length;
 function empty(el, title, description) {
@@ -33,6 +33,18 @@ function renderCategories() {
  const visible=names.filter(n=>lower(n).replace(/\s/g,'').includes(q));
  $('category-note').textContent=`수집된 전체 품명 ${names.length}개${q?' · 검색 결과 '+visible.length+'개':''} · 품명을 누르면 계약단가를 보여줍니다`;
  $('category-grid').innerHTML=visible.map(name=>`<button class="category-card item-name-card${state.query===name?' active':''}" aria-pressed="${state.query===name}" data-item-name="${escape(name)}"><strong>${escape(name)}</strong><span>계약단가 보기 ↗</span></button>`).join('')||'<p>일치하는 품명이 없습니다. 품목으로 찾기에서 판매정보를 검색해 보세요.</p>';
+ updateNameExpansion();
+}
+function updateNameExpansion() {
+ const grid=$('category-grid'),toggle=$('toggle-names');
+ const cards=[...grid.querySelectorAll('[data-item-name]')];
+ const columns=getComputedStyle(grid).gridTemplateColumns.split(/\s+/).length;
+ const searching=Boolean($('catalog-name-search').value.trim());
+ const expanded=state.namesExpanded||searching;
+ cards.forEach((card,index)=>{card.hidden=!expanded&&index>=columns;});
+ toggle.hidden=searching||cards.length<=columns;
+ toggle.setAttribute('aria-expanded',String(expanded));
+ toggle.textContent=expanded?'접어두기 · 첫 줄만 ↑':`전체 품명 ${cards.length}개 펼치기 ↓`;
 }
 let selectionRequest=0;
 
@@ -187,3 +199,9 @@ init();
 
 $('catalog-name-search').oninput=()=>{if(state.catalog)renderCategories();};
 $('category-grid').onclick=e=>{const b=e.target.closest('[data-item-name]');if(b)selectCategory(b.dataset.itemName);};
+$('toggle-names').onclick=()=>{state.namesExpanded=!state.namesExpanded;updateNameExpansion();};
+let nameGridWidth=0;
+new ResizeObserver(entries=>{
+ const width=entries[0].contentRect.width;
+ if(width!==nameGridWidth){nameGridWidth=width;updateNameExpansion();}
+}).observe($('category-grid'));
