@@ -19,6 +19,12 @@ function render(reset=true){
  results.sort((a,b)=>b.score-a.score||a.b.name.localeCompare(b.b.name,'ko'));
  const group=PURCHASE_CATEGORIES.find(c=>c.id===$('category').value), selectedItem=group?.items.find(i=>i.id===$('subcategory').value);
  $('category-note').textContent=group?`${group.name}${selectedItem?' → '+selectedItem.name:''} · 공개 상품명의 관련 표현으로 연결합니다. 검색어와 사업장 유형을 추가하면 결과가 좁혀집니다.`:'분류는 탐색을 돕는 기준입니다. 실제 규격과 공급 가능 여부는 상품 원문에서 확인하세요.';
+ const chips=[];
+ if(group)chips.push(['category',group.name+(selectedItem?' / '+selectedItem.name:'')]);
+ if($('q').value.trim())chips.push(['q','검색: '+$('q').value.trim()]);
+ for(const id of ['type','extra','status','source'])if($(id).value!==({type:'-1',extra:'-1',status:'0',source:'all'}[id]))chips.push([id,$(id).selectedOptions[0].text]);
+ if($('pending').checked)chips.push(['pending','미연결 판매자 포함']);
+ $('active-filters').innerHTML=chips.map(([id,label])=>`<button type="button" data-clear="${id}" aria-label="${esc(label)} 조건 해제">${esc(label)}<span aria-hidden="true">×</span></button>`).join('');
  const pages=Math.max(1,Math.ceil(results.length/15));page=Math.min(page,pages);
  $('title').textContent=`업체 ${num(results.length)}곳 · 상품·서비스 ${num(results.reduce((n,r)=>n+r.offers.length,0))}건`;
  $('context').textContent='상품명 일치 순 · 사업자번호로 업체 연결 · '+(terms.length<rawTerms.length?'제작·구매 등 주문 표현을 제외하고 검색합니다.':'상품 제목과 원본 분류를 검색합니다.');
@@ -28,7 +34,7 @@ function render(reset=true){
   return `<article class="supplier-card offer-card"><h3>${esc(b.name||'업체명 미기재')}</h3><div>${badge(b)}</div><p class="source-note">사업자번호 ${esc(b.bizno||'원본 미기재')}${b.masks[0]?` · <a href="./?q=${encodeURIComponent(b.bizno)}#search-section">사업장 명단·인증 이력 →</a>`:''}</p><ul class="offer-list">${offers.slice(0,5).map(item).join('')}</ul>${offers.length>5?`<details><summary>일치하는 상품 ${num(offers.length-5)}건 더 보기</summary><ul class="offer-list">${offers.slice(5).map(item).join('')}</ul></details>`:''}<details><summary>사업장 연락처·주소 보기</summary>${contacts.map(o=>`<p class="offer-contact"><strong>${esc(o.supplier)}</strong> · ${esc(sources[o.source])}<span>전화 ${esc(o.phone||'원본 미기재')}</span><span>주소 ${esc(o.address||'원본 미기재')}</span><a href="${safeLink(o.sellerUrl||o.url)}" target="_blank" rel="noopener">연락처 출처 ↗</a></p>`).join('')}</details></article>`;
  }).join('')||'<div class="offer-empty">수집된 판매정보에서 일치하는 업체를 찾지 못했습니다. 검색어를 짧게 바꾸거나 유형·기간 조건을 조정해 보세요. 해당 품목의 판매업체가 없다는 뜻은 아닙니다.</div>';
  $('page-label').textContent=`${page} / ${pages}`;$('prev').disabled=page<=1;$('next').disabled=page>=pages;
- const params=new URLSearchParams();if($('category').value)params.set('category',$('category').value);if($('subcategory').value)params.set('item',$('subcategory').value);if($('q').value)params.set('q',$('q').value);history.replaceState(null,'',location.pathname+(params.size?'?'+params.toString():''));
+ const params=new URLSearchParams();for(const id of ['type','extra','status','source']){if($(id).value!==({type:'-1',extra:'-1',status:'0',source:'all'}[id]))params.set(id,$(id).value);}if($('pending').checked)params.set('pending','1');if($('category').value)params.set('category',$('category').value);if($('subcategory').value)params.set('item',$('subcategory').value);if($('q').value)params.set('q',$('q').value);history.replaceState(null,'',location.pathname+(params.size?'?'+params.toString():''));
 }
 async function load(){try{
  const r=await fetch('./data/offers.json');if(!r.ok)throw Error('판매정보 파일을 받지 못했습니다');data=await r.json();if(data.schemaVersion===2)for(const b of data.businesses)b.offers=b.offers.map(([id,title,category,observedAt,c])=>{const [source,code]=id.split(':'),k=b.contacts[c]||{};return {id,source,title,category,observedAt,supplier:k.supplier,phone:k.phone,address:k.address,sellerUrl:k.sellerUrl,url:data.productUrl[source].replace('{}',code)};});
@@ -41,8 +47,13 @@ async function load(){try{
  $('category').innerHTML='<option value="">전체 구매군</option>'+PURCHASE_CATEGORIES.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
  $('category').value=PURCHASE_CATEGORIES.some(c=>c.id===params.get('category'))?params.get('category'):'';updateSubcategories();
  const selected=PURCHASE_CATEGORIES.find(c=>c.id===$('category').value);if(selected?.items.some(i=>i.id===params.get('item')))$('subcategory').value=params.get('item');
- $('q').value=params.get('q')||'';render();
+ for(const id of ['type','extra','status','source']){const value=params.get(id);if([...$(id).options].some(o=>o.value===value))$(id).value=value;}
+ $('pending').checked=params.get('pending')==='1';$('q').value=params.get('q')||'';render();
  }catch(e){$('title').textContent='판매정보를 불러오지 못했습니다';$('coverage').textContent=e.message+' · 새로고침해 주세요.';}}
+$('active-filters').onclick=e=>{const b=e.target.closest('[data-clear]');if(!b)return;const id=b.dataset.clear;
+ if(id==='category'){$('category').value='';updateSubcategories();}else if(id==='pending'){$('pending').checked=false;}else{$(id).value=({type:'-1',extra:'-1',status:'0',source:'all',q:''})[id];}
+ render();$('reset').focus();
+};
 function renderCategoryButtons(){
  const query=norm($('category-search').value), selected=$('category').value, item=$('subcategory').value;
  const matches=i=>norm(i.name+' '+i.terms.join(' ')).includes(query);
@@ -67,6 +78,6 @@ function updateSubcategories(){
 }
 $('category').onchange=()=>{updateSubcategories();render();};$('subcategory').onchange=()=>render();
 $('offer-search').onsubmit=e=>{e.preventDefault();render();};for(const id of ['type','extra','status','source','pending'])$(id).onchange=()=>render();
-document.addEventListener('click',e=>{const b=e.target.closest('[data-query]');if(b&&data){$('category').value='';updateSubcategories();$('q').value=b.dataset.query;render();}});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-query]');if(b&&data){$('category-search').value='';$('category').value='';updateSubcategories();$('q').value=b.dataset.query;render();}});
 $('reset').onclick=()=>{$('category-search').value='';$('category').value='';updateSubcategories();$('q').value='';$('type').value=$('extra').value='-1';$('status').value='0';$('source').value='all';$('pending').checked=false;render();};
-$('prev').onclick=()=>{page--;render(false);};$('next').onclick=()=>{page++;render(false);};load();
+$('prev').onclick=()=>{page--;render(false);$('results-top').scrollIntoView({block:'start'});};$('next').onclick=()=>{page++;render(false);$('results-top').scrollIntoView({block:'start'});};load();

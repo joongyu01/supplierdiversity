@@ -1,10 +1,12 @@
-# 구매이음 · Supplier Diversity
+# K-Petro 정부권장정책 구매지원
 
 공공기관 구매 담당자가 우선구매 대상 기업을 **① 누구인지(사업장 명단) → ② 무엇을 파는지(품목) → ③ 얼마에 살 수 있는지(종합쇼핑몰 계약단가)** 까지 한 사이트에서 확인하는 도구입니다.
 
 `joongyu01/supplier_diversity`(종합쇼핑몰 우대기업 물품 카탈로그)와 `joongyu01/supplier_diversity_2`(구매이음 사업장 명단·품목 검색)를 합친 저장소입니다. 두 저장소의 커밋 이력은 모두 보존되어 있습니다.
 
 - 웹사이트: https://joongyu01.github.io/supplierdiversity/
+
+UI 구성과 수정 범위는 [docs/ui.md](docs/ui.md)를 참고하세요.
 
 ## 화면
 
