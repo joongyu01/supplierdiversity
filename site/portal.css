@@ -311,17 +311,23 @@ h1 {
 .category-column {
   position:sticky;
   top:16px;
+  display:grid;
+  gap:14px;
+  align-content:start;
   min-width:0;
 }
 .category-sidebar {
+  position:static;
+  min-width:0;
   padding:18px;
 }
 .sidebar-credit {
-  padding:16px 6px 0;
-  color:#74816c;
-  font-size:10px;
-  line-height:1.8;
+  padding:0 4px;
+  color:#5f6e54;
+  font-size:11px;
+  line-height:1.65;
   text-align:center;
+  overflow-wrap:break-word;
 }
 .sidebar-credit span {display:block;}
 .sidebar-credit strong {font-weight:600;color:#526444;}

@@ -97,6 +97,8 @@ jobs:
         if: inputs.publish
       - name: Prepare progressive offer delivery
         run: python scripts/build_offer_delivery.py
+      - name: Version browser assets
+        run: python scripts/version_site_assets.py
       - uses: actions/upload-pages-artifact@v3
         if: inputs.publish
         with:

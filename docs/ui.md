@@ -16,3 +16,5 @@ Validation: desktop and mobile flows for category selection, search, URL restora
 Brand asset: `site/assets/kpetro-logo-transparent.png` is the transparent header variant of the preserved original `kpetro-logo.png`, edited with the built-in image generation tool. Edit brief: remove the white background, preserve the original K-Petro symbol, Korean lettering, proportions, and gray/green colors; use PNG alpha with no white matte. The header uses normal compositing.
 
 The offers category column and every page footer display “© 2026 Joongyu Shin. All rights reserved.” and “Developed by Joongyu Shin.” The credit sits below the category card, outside its scroll area.
+
+Cache consistency: deployment runs `scripts/version_site_assets.py` before publishing. Every local CSS/JS reference in HTML receives a content-hash `v` parameter, so a new page cannot silently reuse an earlier stylesheet after layout changes. Run the same script after asset edits when preparing a local preview. The category card and credits share one sticky grid column; only the category list scrolls.
