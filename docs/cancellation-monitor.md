@@ -1,20 +1,34 @@
-# 사회적기업 인증 변경 공고 수집
+# 기업 유형별 인증 변경 공고 수집
 
 ## 운영
 
-GitHub Actions `Watch social enterprise cancellations`가 매일 한국시간 08:23에 실행됩니다.
+GitHub Actions `Watch enterprise certification changes`가 매일 한국시간 08:23에 실행됩니다.
 GitHub 스케줄은 지연될 수 있으며 기본 브랜치에 workflow가 있어야 동작합니다.
 공개 저장소의 장기간 비활동으로 스케줄이 비활성화되는 경우 Actions에서 다시 활성화해야 합니다.
 Actions의 **Run workflow**로 수동 실행할 수 있습니다. API 키는 필요하지 않습니다.
 
-수집에 성공하면 `site/data/cancellation-notices.json`만 봇 계정으로 커밋하고 Pages를 직접 배포합니다.
+수집 결과는 `site/data/cancellation-notices.json`과 `site/data/policy-notices.json`에 봇 계정으로 커밋하고 Pages를 직접 배포합니다.
 GITHUB_TOKEN 커밋으로 별도의 push workflow가 실행되지 않아도 새 결과가 게시됩니다.
 실행 요약에는 신규·정정 공고 링크와 검사 범위가 표시됩니다. 별도의 이메일/이슈 발송은 설정하지 않습니다.
 실패는 Actions 실행 결과에 표시되며, 개인 알림은 GitHub 알림 설정을 따릅니다.
 
 조회 화면은 `/cancellations.html`입니다. 마지막 전체 수집 성공시각을 표시하고 48시간 초과 시 경고합니다.
 
-## 범위와 출처
+## 추가 유형의 범위와 출처
+
+`scripts/watch_policy_changes.py`는 다음 공식 게시판의 2026년 이후 게시물 중 검색 목록 앞 3페이지를 확인합니다. 전국 전수 수집이 아닙니다.
+
+- 서울·충남·경기 지방중소벤처기업청: 여성기업·장애인기업 등의 확인 취소·반납·청문 공고.
+- 한국장애인고용공단 공지사항 및 표준사업장 자료실: 표준사업장 취소 공고와 취소 첨부가 있는 분기 현황.
+- 꿈드래 공지사항: 중증장애인생산품 관련 취소 공고 후보.
+
+분류는 제목과 목록의 첨부파일 이름에 근거합니다. 청문·사전통지와 분기 현황을 취소 확정 공고로 분류하지 않습니다. 원문·첨부의 사업자번호와 효력일 확인이 필요합니다. 소스별 확인 실패 시 해당 소스의 기존 기록과 마지막 성공일을 유지하며 화면에 실패를 표시합니다. 성공한 다른 소스는 갱신합니다.
+
+사회적협동조합은 소관 인가부처별 자동 공고 수집이 아직 연결되지 않았습니다. 중소기업·창업기업도 관련 게시판의 한정된 검색 범위이며 모든 취소를 포괄하지 않습니다. 8개 유형 선택 기능과 공식 조회 서비스 연결은 제공하지만 공고 미발견을 유효 인증으로 취급하지 않습니다.
+
+사업장의 ‘현재 상태 확인’은 사업자번호를 복사하고 유형별 공식 서비스로 이동하는 기능입니다. 로그인 또는 확인서 번호가 필요한 경우가 있어 실시간 인증 유효성을 자동 판정하는 API가 아닙니다.
+
+## 사회적기업 범위와 출처
 
 - 관서 목록: [고용노동부 노동포털 관할관서 찾기](https://labor.moel.go.kr/portalGuide/competence_find.do), 2026-09-11 확인 49개 관서.
 - 관리 파일: `config/cancellation-sources.json`. 관서 신설·개편 시 공식 목록과 대조하여 갱신합니다.
@@ -29,7 +43,7 @@ GITHUB_TOKEN 커밋으로 별도의 push workflow가 실행되지 않아도 새 
 - [서울서부지청 인증취소 공고](https://www.moel.go.kr/local/seoulseobu/news/notice/noticeView.do?bbs_seq=20260701078)
 - [부산지방고용노동청 인증취소 공고](https://www.moel.go.kr/local/busan/news/notice/noticeView.do?bbs_seq=20260800549)
 
-## 실패·변경 처리
+## 사회적기업 실패·변경 처리
 
 - HTML 구조, 검색어 반영, 게시물 날짜, 반복 페이지, 목록/상세 제목 일치를 검증합니다.
 - 관서 게시판 하나라도 실패하거나 페이지/요청 상한에 도달하면 전체 실행을 실패 처리하고 기존 결과를 보존합니다.
@@ -55,6 +69,7 @@ GITHUB_TOKEN 커밋으로 별도의 push workflow가 실행되지 않아도 새 
 python -m pip install -r requirements-cancellation.txt
 python -m unittest discover -s tests -p test_cancellations.py -v
 python scripts/watch_cancellations.py
+python scripts/watch_policy_changes.py
 ```
 
 소규모 실조회는 별도 파일에 저장합니다. 부분 관서 실행으로 운영 데이터를 덮어쓰는 것은 금지합니다.

@@ -17,3 +17,5 @@ api key.txt
 data/raw/
 .claude/
 data/offers/
+
+site/data/offer-batches/

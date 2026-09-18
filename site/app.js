@@ -9,6 +9,7 @@ const PAGE = 25;
 
 const state = { catalog: null, chunkCache: new Map(), query: '', products: [], filtered: [], page: 1 };
 
+const enterpriseTypeCount=bizno=>typesOf(bizno).filter(t=>!['기술개발제품 시범구매','자활용사촌'].includes(t)).length;
 function empty(el, title, description) {
   el.innerHTML = `<div class="empty"><div class="empty-icon">⌕</div><h3>${escape(title)}</h3><p>${escape(description)}</p></div>`;
 }
@@ -22,51 +23,47 @@ function contactBlock(c) {
   if (c.homepage) parts.push(`<small class="contact"><a href="${escape(c.homepage)}" target="_blank" rel="noopener">홈페이지 ↗</a></small>`);
   return parts.join('');
 }
-function registryLink(bizno) { return /^\d{10}$/.test(String(bizno ?? '').replace(/\D/g, '')) ? `<small class="contact"><a href="./?q=${encodeURIComponent(bizno)}#search-section">사업장 명단·인증 이력 →</a></small>` : ''; }
+function registryLink(bizno) { return /^\d{10}$/.test(String(bizno ?? '').replace(/\D/g, '')) ? `<small class="contact"><a href="./businesses.html?q=${encodeURIComponent(bizno)}#search-section">사업장 명단·인증 이력 →</a></small>` : ''; }
 function typeBadge(t, status) { return `<span class="tag tag-type${status === 'expired' ? ' tag-warn' : ''}" title="${escape(t)}${status === 'expired' ? ' · 인증 만료' : ''}">${escape(SHORT[t] || t)}</span>`; }
 
 /* ---------- STEP 1: 품명 카드 ---------- */
 function renderCategories() {
-  const grid = $('category-grid');
-  const chunks = [...state.catalog.chunks].sort((a, b) => b.suppliers - a.suppliers);
-  if (!chunks.length) return empty(grid, '아직 수집된 품목이 없습니다', 'scripts/collect_shopmall.py 로 수집한 뒤 build_catalog.py 를 실행하세요.');
-  $('category-note').textContent = `${chunks.length}개 품명 · 카드를 누르면 공급 우대기업을 보여줍니다`;
-  grid.innerHTML = chunks.map((c) => {
-    const top = Object.entries(c.typeSuppliers).sort((a, b) => TYPE_ORDER.indexOf(a[0]) - TYPE_ORDER.indexOf(b[0]));
-    return `<button class="category-card${state.query === c.query ? ' active' : ''}" role="listitem" data-query="${escape(c.query)}">
-      <strong>${escape(c.query)}</strong>
-      <span class="category-count">우대기업 <b>${c.suppliers.toLocaleString()}곳</b> · 품목 ${c.count.toLocaleString()}건 <small>/ 전체 ${c.all.toLocaleString()}건</small></span>
-      <span class="category-types">${top.map(([t, n]) => `<span class="mini-tag">${escape(SHORT[t] || t)} ${n}</span>`).join('') || '<span class="text-muted">우대기업 없음</span>'}</span>
-    </button>`;
-  }).join('');
-  grid.querySelectorAll('.category-card').forEach((b) => b.addEventListener('click', () => selectCategory(b.dataset.query)));
+ const names=[...new Set(state.catalog.chunks.flatMap(c=>c.names))].sort((a,b)=>a.localeCompare(b,'ko'));
+ const q=lower($('catalog-name-search').value).replace(/\s/g,'');
+ const visible=names.filter(n=>lower(n).replace(/\s/g,'').includes(q));
+ $('category-note').textContent=`수집된 전체 품명 ${names.length}개${q?' · 검색 결과 '+visible.length+'개':''} · 품명을 누르면 계약단가를 보여줍니다`;
+ $('category-grid').innerHTML=visible.map(name=>`<button class="category-card item-name-card${state.query===name?' active':''}" aria-pressed="${state.query===name}" data-item-name="${escape(name)}"><strong>${escape(name)}</strong><span>계약단가 보기 ↗</span></button>`).join('')||'<p>일치하는 품명이 없습니다. 품목으로 찾기에서 판매정보를 검색해 보세요.</p>';
 }
+let selectionRequest=0;
 
 async function selectCategory(query) {
-  const chunk = state.catalog.chunks.find((c) => c.query === query);
-  if (!chunk) return;
+  const chunks=state.catalog.chunks.filter(c=>c.names.includes(query));if(!chunks.length)return;const request=++selectionRequest;
   state.query = query;
   $('explore').hidden = false;
   $('explore-title').textContent = `${query} · 로드 중…`;
-  $('result-count').textContent = `${chunk.count.toLocaleString()}건 불러오는 중`;
-  $('results').innerHTML = '';
+  $('result-count').textContent = '선택한 품명의 계약단가를 불러오는 중';
+  state.products=[];state.filtered=[];$('export').disabled=true;$('pagination').hidden=true;$('badge-bar').innerHTML='';
+  $('results').innerHTML = '<p class="loading-preview" role="status">선택한 품명의 계약단가를 받는 중입니다.</p>';
   renderCategories();
   try {
-    if (!state.chunkCache.has(query)) {
-      const res = await fetch('./data/' + chunk.file);
-      if (!res.ok) throw new Error('chunk');
-      state.chunkCache.set(query, (await res.json()).products);
-    }
-  } catch {
-    return empty($('results'), '품목을 불러오지 못했습니다', '잠시 후 다시 시도해 주세요.');
+    const parts=await Promise.all(chunks.map(async chunk=>{
+      if(!state.chunkCache.has(chunk.query)){
+        const res=await fetch('./data/'+chunk.file);if(!res.ok)throw Error('chunk');
+        state.chunkCache.set(chunk.query,(await res.json()).products);
+      }
+      return state.chunkCache.get(chunk.query).filter(p=>p.n===query);
+    }));
+    if(request!==selectionRequest)return;
+    state.products=[...new Map(parts.flat().map(p=>[JSON.stringify(p),p])).values()];
+  }catch{
+    if(request===selectionRequest){$('explore-title').textContent=query;$('result-count').textContent='불러오기 실패';empty($('results'),'품목을 불러오지 못했습니다','품명 버튼을 다시 눌러주세요.');}return;
   }
-  state.products = state.chunkCache.get(query);
   const nameSel = $('filter-name');
-  nameSel.innerHTML = '<option value="">전체</option>' + chunk.names.map((n) => `<option value="${escape(n)}">${escape(n)}</option>`).join('');
+  nameSel.innerHTML = '<option value="">전체</option>' + [query].map((n) => `<option value="${escape(n)}">${escape(n)}</option>`).join('');
   for (const id of ['search', 'filter-type', 'filter-name', 'sort']) $(id).value = '';
-  $('hide-large').checked = true;
+  $('sort').value='types';$('hide-large').checked = true;
   state.page = 1;
-  $('explore-title').textContent = `${query} · 우대기업 ${chunk.suppliers.toLocaleString()}곳 · ${chunk.count.toLocaleString()}건`;
+  $('explore-title').textContent = `${query} · ${state.products.length.toLocaleString()}건`;
   render();
   $('explore').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -86,6 +83,7 @@ function render() {
     return true;
   });
   const sort = $('sort').value;
+  if (sort === 'types') rows.sort((a,b)=>enterpriseTypeCount(b.b)-enterpriseTypeCount(a.b)||supplier(a.b).name.localeCompare(supplier(b.b).name,'ko'));
   if (sort === 'price-asc') rows = rows.sort((a, b) => num(a.p) - num(b.p));
   else if (sort === 'price-desc') rows = rows.sort((a, b) => num(b.p) - num(a.p));
   else if (sort === 'company') rows = rows.sort((a, b) => a.cn.localeCompare(b.cn, 'ko'));
@@ -117,7 +115,7 @@ function render() {
         <td><div class="product-title">${escape(p.n)}</div><div class="spec-cell">${escape(p.s)}</div>${p.x ? '<span class="tag tag-accent">우수제품</span>' : ''}${p.k ? '<span class="tag tag-sme">중기간경쟁</span>' : ''}</td>
         <td>${escape(p.m || '—')}</td>
         <td class="price-cell"><strong>${won(p.p)}</strong><small>${escape(p.u || '')}</small></td>
-        <td><div class="company-name">${escape(p.cn || s.name)}</div><small class="bizno-code">사업자 ${escape(p.b)}</small>${registryLink(p.b)}${contactBlock(s)}${s.excludedAsLargeCorp ? '<span class="tag tag-warn">대기업·상호출자</span>' : ''}</td>
+        <td><div class="company-name">${escape(p.cn || s.name)}</div><small class="bizno-code">사업자 ${escape(p.b)}</small>${registryLink(p.b)}<button class="verify-inline" data-verify="${escape(p.b)}" data-name="${escape(p.cn||s.name)}">현재 상태 확인 ↗</button>${contactBlock(s)}${s.excludedAsLargeCorp ? '<span class="tag tag-warn">대기업·상호출자</span>' : ''}</td>
         <td>${s.types.map((t) => typeBadge(t.type, t.status)).join('')}</td>
         <td><span class="status-badge ${expired ? 'expired' : 'valid'}">${escape(p.e || '—')}</span></td>
       </tr>`;
@@ -125,7 +123,7 @@ function render() {
 }
 
 for (const id of ['search', 'filter-type', 'filter-name', 'sort', 'hide-large']) $(id).addEventListener('input', () => { state.page = 1; render(); });
-$('reset').onclick = () => { for (const id of ['search', 'filter-type', 'filter-name', 'sort']) $(id).value = ''; $('hide-large').checked = true; state.page = 1; render(); };
+$('reset').onclick = () => { for (const id of ['search', 'filter-type', 'filter-name', 'sort']) $(id).value = ''; $('sort').value='types';$('hide-large').checked = true; state.page = 1; render(); };
 $('prev').onclick = () => { state.page--; render(); };
 $('next').onclick = () => { state.page++; render(); };
 
@@ -153,7 +151,7 @@ function renderFacilities() {
   $('facility-results').innerHTML = `<div class="table-wrap"><table>
     <thead><tr><th scope="col">생산시설</th><th scope="col">연락처 · 주소</th><th scope="col">생산품목</th><th scope="col">지정 유효기간</th></tr></thead>
     <tbody>${rows.slice(0, 200).map((f) => `<tr>
-      <td><div class="company-name">${escape(f.name)}</div><small class="bizno-code">사업자 ${escape(f.bizno)}</small>${registryLink(f.bizno)}${f.otherTypes.map((t) => typeBadge(t)).join('')}</td>
+      <td><div class="company-name">${escape(f.name)}</div><small class="bizno-code">사업자 ${escape(f.bizno)}</small>${registryLink(f.bizno)}<button class="verify-inline" data-verify="${escape(f.bizno)}" data-name="${escape(f.name)}">현재 상태 확인 ↗</button>${f.otherTypes.map((t) => typeBadge(t)).join('')}</td>
       <td>${contactBlock(f) || '<span class="text-muted">—</span>'}</td>
       <td>${f.items.map((i) => `<span class="mini-tag${q && lower(i).includes(q) ? ' hit' : ''}">${escape(i)}</span>`).join(' ')}</td>
       <td><span class="status-badge ${f.status === 'expired' ? 'expired' : 'valid'}">${escape(f.validUntil || '—')}</span></td>
@@ -179,10 +177,13 @@ async function init() {
       const o = document.createElement('option'); o.value = r; o.textContent = r; $('facility-region').append(o);
     }
     renderCategories();
-    renderFacilities();
+    requestAnimationFrame(()=>requestAnimationFrame(renderFacilities));
   } catch {
     $('status-label').textContent = '데이터 로드 실패';
     empty($('category-grid'), '데이터를 불러오지 못했습니다', '잠시 후 새로고침해 주세요. 문제가 계속되면 GitHub에서 배포 상태를 확인하세요.');
   }
 }
 init();
+
+$('catalog-name-search').oninput=()=>{if(state.catalog)renderCategories();};
+$('category-grid').onclick=e=>{const b=e.target.closest('[data-item-name]');if(b)selectCategory(b.dataset.itemName);};

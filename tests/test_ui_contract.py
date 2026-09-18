@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class PublishedUIContractTests(unittest.TestCase):
     def test_entry_points_and_local_assets_exist(self):
-        for name in ['index.html', 'offers.html', 'catalog.html', 'cancellations.html', 'product-search.html']:
+        for name in ['index.html', 'offers.html', 'businesses.html', 'catalog.html', 'cancellations.html', 'product-search.html']:
             with self.subTest(page=name):
                 page = ROOT / 'site' / name
                 self.assertTrue(page.is_file(), f'Missing entry point: {name}')
@@ -22,11 +22,20 @@ class PublishedUIContractTests(unittest.TestCase):
                 for a in soup.select('nav a[href]'):
                     target = urlsplit(a['href']).path
                     self.assertTrue((page.parent / (target + 'index.html' if target.endswith('/') else target)).is_file(), a['href'])
+                self.assertEqual([a['href'] for a in soup.select('nav[aria-label="주 메뉴"] a')],
+                                 ['./', './catalog.html', './businesses.html', './cancellations.html'])
 
     def test_offer_controls_survive_template_updates(self):
         soup = BeautifulSoup((ROOT / 'site/offers.html').read_text(encoding='utf-8'), 'html.parser')
         for key in ['category', 'subcategory', 'category-search', 'category-buttons', 'subcategory-buttons', 'q', 'type', 'extra', 'status', 'source', 'pending', 'active-filters', 'results-top', 'source-details']:
             self.assertIsNotNone(soup.find(id=key), key)
+
+    def test_home_is_the_offer_finder(self):
+        home = (ROOT / 'site/index.html').read_text(encoding='utf-8')
+        self.assertEqual(home, (ROOT / 'site/offers.html').read_text(encoding='utf-8'))
+        soup = BeautifulSoup(home, 'html.parser')
+        for key in ['retry-offers', 'offer-sort', 'offer-search']:
+            self.assertIsNotNone(soup.find(id=key))
 
 if __name__ == '__main__':
     unittest.main()

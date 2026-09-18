@@ -1,6 +1,6 @@
 # K-Petro 정부권장정책 구매지원
 
-공공기관 구매 담당자가 우선구매 대상 기업을 **① 누구인지(사업장 명단) → ② 무엇을 파는지(품목) → ③ 얼마에 살 수 있는지(종합쇼핑몰 계약단가)** 까지 한 사이트에서 확인하는 도구입니다.
+공공기관 구매 담당자가 우선구매 대상 기업을 **① 무엇을 파는지(품목) → ② 얼마에 살 수 있는지(계약단가) → ③ 누구인지(사업장 명단)** 까지 한 사이트에서 확인하는 도구입니다.
 
 `joongyu01/supplier_diversity`(종합쇼핑몰 우대기업 물품 카탈로그)와 `joongyu01/supplier_diversity_2`(구매이음 사업장 명단·품목 검색)를 합친 저장소입니다. 두 저장소의 커밋 이력은 모두 보존되어 있습니다.
 
@@ -12,13 +12,19 @@ UI 구성과 수정 범위는 [docs/ui.md](docs/ui.md)를 참고하세요.
 
 | 화면 | 파일 | 하는 일 | 원래 저장소 |
 |---|---|---|---|
-| 사업장 명단 (홈) | `site/index.html` | 8개 유형 44만 사업자번호를 업체명·사업자번호로 조회, 유형·기간·취소 이력과 연락처 | supplier_diversity_2 |
-| 품목으로 찾기 | `site/offers.html` | 가치장터·꿈드래 공개 상품·서비스로 업체 찾기, 사업자번호로 명단 연결 | supplier_diversity_2 |
-| 쇼핑몰 단가 카탈로그 | `site/catalog.html` | 나라장터 종합쇼핑몰 품명별 우대기업 품목·규격·계약단가, CSV, 중증 생산시설 생산품목 | supplier_diversity |
-| 인증 변경 공고 | `site/cancellations.html` | 고용노동부 관서의 사회적기업 인증취소·반납 공고 (매일 수집) | 공통 |
+| 사업장 명단 | `site/businesses.html` | 8개 유형 44만 사업자번호를 업체명·사업자번호로 조회, 유형·기간·취소 이력과 연락처 | supplier_diversity_2 |
+| 품목으로 찾기 (홈) | `site/index.html`, `site/offers.html` | 가치장터·꿈드래 공개 상품·서비스로 업체 찾기, 사업자번호로 명단 연결 | supplier_diversity_2 |
+| 계약단가 조회 | `site/catalog.html` | 나라장터 종합쇼핑몰 품명별 우대기업 품목·규격·계약단가, CSV, 중증 생산시설 생산품목 | supplier_diversity |
+| 인증 변경 공고 | `site/cancellations.html` | 사회적기업 및 추가 유형의 공식 취소·반납·사전통지 공고 (수집 범위 명시) | 공통 |
 | 이전 검색 화면 | `site/product-search.html` | 구 품목 검색·검토목록 (보존) | supplier_diversity_2 |
 
-모든 화면은 같은 상단 메뉴로 이어집니다. 카탈로그와 품목 검색의 업체 옆 **사업장 명단·인증 이력 →** 링크는 `./?q=<사업자번호>`로 명단 화면을 열어, 쇼핑몰 자료에 없는 유형·만료·취소 기록까지 확인하게 합니다.
+모든 화면은 같은 상단 메뉴로 이어집니다. 카탈로그와 품목 검색의 업체 옆 **사업장 명단·인증 이력 →** 링크는 `./businesses.html?q=<사업자번호>`로 명단 화면을 열어, 쇼핑몰 자료에 없는 유형·만료·취소 기록까지 확인하게 합니다.
+
+품명 선택에는 수집 묶음이 아니라 `chunks[].names`의 **실제 품명 전체**를 펼쳐 표시합니다. 품명 검색 후 버튼을 누르면 모든 관련 묶음에서 그 품명만 조회합니다. 사업장 결과는 명단에 기록된 기업 유형이 많은순으로 정렬할 수 있습니다.
+
+홈은 검색 조건을 먼저 표시하고 공개 판매정보를 받는 대로 결과를 추가합니다. 배포 시 `build_offer_delivery.py`가 `offers.json`에서 초기 묶음과 내용 해시 기반 후속 묶음을 생성합니다. 일부 요청 실패 시 이미 받은 결과는 유지하고 누락된 묶음만 재시도합니다.
+
+업체의 **현재 상태 확인**은 사업자번호 복사와 8개 유형의 공식 조회 서비스 연결을 제공합니다. 로그인이나 확인서 번호가 필요한 서비스가 있어 사이트 자체에서 실시간 인증 유효성을 자동 판정하지 않습니다. 공고 발견만으로 사업장 상태를 변경하지 않습니다.
 
 ## 공통 원칙
 
@@ -37,6 +43,7 @@ Python 3.10 이상.
 ```powershell
 python -m pip install -r requirements.txt
 python -m unittest discover -s tests -v
+python scripts/build_offer_delivery.py       # 공개 판매정보를 작은 전송 묶음으로 준비
 python -m http.server 8000 --directory site   # http://localhost:8000
 ```
 
@@ -87,9 +94,9 @@ python scripts/build_catalog.py               # 엑셀 원본이 저장소 루�
 
 종합쇼핑몰 API는 등록·변경 이벤트 피드라 전체 수집은 월 10~19만 건입니다. 품명 필터로 필요한 품명만 받습니다(하루 1,000회 한도).
 
-### 4. 인증 변경 공고 (`site/data/cancellation-notices.json`)
+### 4. 인증 변경 공고 (`site/data/cancellation-notices.json`, `site/data/policy-notices.json`)
 
-GitHub Actions `watch-cancellations.yml`이 매일 08:23(KST) 실행합니다. 전체 관서 수집에 성공할 때만 JSON을 교체하고, 공고만으로 업체 상태를 바꾸지 않습니다. 수동 실행: `python scripts/watch_cancellations.py` (`requirements-cancellation.txt`).
+GitHub Actions `watch-cancellations.yml`이 매일 08:23(KST) 실행합니다. 전체 관서 수집에 성공할 때만 JSON을 교체하고, 공고만으로 업체 상태를 바꾸지 않습니다. 수동 실행: `python scripts/watch_cancellations.py` (`requirements-cancellation.txt`). 추가 유형은 `python scripts/watch_policy_changes.py`로 서울·충남·경기 중기청, 장애인고용공단, 꿈드래의 2026년 이후 앞 3페이지를 확인합니다. 전국 전수 수집이 아니며, 사회적협동조합 인가부처별 자동 수집은 아직 연결되지 않았습니다. 게시판별 실패 시 기존 기록과 마지막 성공일을 유지합니다.
 
 ### 보조: 지정 업체 등록 물품 (`scripts/collect.py`)
 

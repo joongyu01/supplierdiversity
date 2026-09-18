@@ -1,0 +1,329 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-09-18T04:14:29.979127+00:00",
+  "sources": [
+    {
+      "id": "mss-seoul",
+      "name": "서울지방중소벤처기업청",
+      "url": "https://www.mss.go.kr/site/seoul/ex/bbs/List.do?cbIdx=146&tgtTypeCd=SUB_CONT&searchKey=%EC%B7%A8%EC%86%8C",
+      "types": [
+        "sme",
+        "women",
+        "disabled",
+        "startup"
+      ],
+      "parser": "mss",
+      "checkedAt": "2026-09-18T04:14:29.979127+00:00",
+      "scope": "2026년 이후 게시물 · 해당 목록 검색 결과 앞 3페이지 (전국 전수 아님)",
+      "status": "ok",
+      "lastSuccessfulScanAt": "2026-09-18T04:14:29.979127+00:00",
+      "found": 4
+    },
+    {
+      "id": "mss-chungnam",
+      "name": "충남지방중소벤처기업청",
+      "url": "https://www.mss.go.kr/site/chungnam/ex/bbs/List.do?cbIdx=315&tgtTypeCd=SUB_CONT&searchKey=%EC%B7%A8%EC%86%8C",
+      "types": [
+        "sme",
+        "women",
+        "disabled",
+        "startup"
+      ],
+      "parser": "mss",
+      "checkedAt": "2026-09-18T04:14:29.979127+00:00",
+      "scope": "2026년 이후 게시물 · 해당 목록 검색 결과 앞 3페이지 (전국 전수 아님)",
+      "status": "ok",
+      "lastSuccessfulScanAt": "2026-09-18T04:14:29.979127+00:00",
+      "found": 4
+    },
+    {
+      "id": "mss-gyeonggi",
+      "name": "경기지방중소벤처기업청",
+      "url": "https://www.mss.go.kr/site/gyeonggi/ex/bbs/List.do?cbIdx=247&tgtTypeCd=SUB_CONT&searchKey=%EC%B7%A8%EC%86%8C",
+      "types": [
+        "sme",
+        "women",
+        "disabled",
+        "startup"
+      ],
+      "parser": "mss",
+      "checkedAt": "2026-09-18T04:14:29.979127+00:00",
+      "scope": "2026년 이후 게시물 · 해당 목록 검색 결과 앞 3페이지 (전국 전수 아님)",
+      "status": "ok",
+      "lastSuccessfulScanAt": "2026-09-18T04:14:29.979127+00:00",
+      "found": 2
+    },
+    {
+      "id": "kead-notices",
+      "name": "한국장애인고용공단 공지사항",
+      "url": "https://www.kead.or.kr/bbs/deptgongji/bbsPage.do?menuId=MENU0895&searchCondition=SJ&searchKeyword=%ED%91%9C%EC%A4%80%EC%82%AC%EC%97%85%EC%9E%A5",
+      "types": [
+        "standard"
+      ],
+      "parser": "kead",
+      "checkedAt": "2026-09-18T04:14:29.979127+00:00",
+      "scope": "2026년 이후 게시물 · 해당 목록 검색 결과 앞 3페이지 (전국 전수 아님)",
+      "status": "ok",
+      "lastSuccessfulScanAt": "2026-09-18T04:14:29.979127+00:00",
+      "found": 1
+    },
+    {
+      "id": "kead-standard",
+      "name": "한국장애인고용공단 표준사업장 자료실",
+      "url": "https://www.kead.or.kr/bbs/standardproduct/bbsPage.do?menuId=MENU0697",
+      "types": [
+        "standard"
+      ],
+      "parser": "kead",
+      "checkedAt": "2026-09-18T04:14:29.979127+00:00",
+      "scope": "2026년 이후 게시물 · 해당 목록 검색 결과 앞 3페이지 (전국 전수 아님)",
+      "status": "ok",
+      "lastSuccessfulScanAt": "2026-09-18T04:14:29.979127+00:00",
+      "found": 3
+    },
+    {
+      "id": "goods",
+      "name": "꿈드래 공지사항",
+      "url": "https://www.goods.go.kr/pp/bd/board/noticeList.do?menuNo=5501000",
+      "types": [
+        "severe"
+      ],
+      "parser": "goods",
+      "checkedAt": "2026-09-18T04:14:29.979127+00:00",
+      "scope": "2026년 이후 게시물 · 해당 목록 검색 결과 앞 3페이지 (전국 전수 아님)",
+      "status": "ok",
+      "lastSuccessfulScanAt": "2026-09-18T04:14:29.979127+00:00",
+      "found": 0
+    }
+  ],
+  "notices": [
+    {
+      "id": "74f46c11cce7c6270aef",
+      "title": "장애인 표준사업장 인증취소 공고",
+      "url": "https://www.kead.or.kr/bbs/deptgongji/bbsView.do?bbsCnId=215835&menuId=MENU0895",
+      "publishedAt": "2026-08-25",
+      "enterpriseTypes": [
+        "standard"
+      ],
+      "kind": "cancellation_notice",
+      "sourceOffice": "한국장애인고용공단 공지사항",
+      "sourceId": "kead-notices",
+      "attachments": [
+        {
+          "name": "인증취소 공고문(6차_260825 취소).pdf",
+          "url": "https://www.kead.or.kr/cmm/fms/downloadDirect.do?key=756CE9E7DF701FF05E72"
+        }
+      ],
+      "reviewStatus": "needs_review"
+    },
+    {
+      "id": "c2802f2b94cea4033fd0",
+      "title": "여성기업 확인 취소 공고",
+      "url": "https://www.mss.go.kr/site/gyeonggi/ex/bbs/View.do?cbIdx=247&bcIdx=1070335",
+      "publishedAt": "2026-08-06",
+      "enterpriseTypes": [
+        "women"
+      ],
+      "kind": "cancellation_notice",
+      "sourceOffice": "경기지방중소벤처기업청",
+      "sourceId": "mss-gyeonggi",
+      "attachments": [],
+      "reviewStatus": "needs_review"
+    },
+    {
+      "id": "71ce93b23a4f03ef202a",
+      "title": "장애인 표준사업장 인증 사업체 및 주요 생산품 현황(26년 6월말 기준)",
+      "url": "https://www.kead.or.kr/bbs/standardproduct/bbsView.do?bbsCnId=214926&menuId=MENU0697",
+      "publishedAt": "2026-07-22",
+      "enterpriseTypes": [
+        "standard"
+      ],
+      "kind": "status_update",
+      "sourceOffice": "한국장애인고용공단 표준사업장 자료실",
+      "sourceId": "kead-standard",
+      "attachments": [
+        {
+          "name": "장애인표준사업장 인증 취소 현황(260630기준)_260724 수정.xlsx",
+          "url": "https://www.kead.or.kr/cmm/fms/downloadDirect.do?key=760735845FCE32DB1761"
+        },
+        {
+          "name": "장애인 표준사업장 현황_26년2분기(260630 기준)_260729 수정.xlsx",
+          "url": "https://www.kead.or.kr/cmm/fms/downloadDirect.do?key=CF2EF69C32095045D64A"
+        }
+      ],
+      "reviewStatus": "needs_review"
+    },
+    {
+      "id": "d2b4be1fa4c7001d6a51",
+      "title": "장애인 표준사업장 인증 사업체 및 주요 생산품 현황(26년 3월말 기준)",
+      "url": "https://www.kead.or.kr/bbs/standardproduct/bbsView.do?bbsCnId=212653&menuId=MENU0697",
+      "publishedAt": "2026-04-17",
+      "enterpriseTypes": [
+        "standard"
+      ],
+      "kind": "status_update",
+      "sourceOffice": "한국장애인고용공단 표준사업장 자료실",
+      "sourceId": "kead-standard",
+      "attachments": [
+        {
+          "name": "장애인 표준사업장 인증취소 현황_26년1분기(260331 기준).xlsx",
+          "url": "https://www.kead.or.kr/cmm/fms/downloadDirect.do?key=87F459DCB1A406FA2B50"
+        },
+        {
+          "name": "장애인 표준사업장 현황_26년1분기(260331 기준)_260701 수정.xlsx",
+          "url": "https://www.kead.or.kr/cmm/fms/downloadDirect.do?key=D338F2B7707D878F2856"
+        }
+      ],
+      "reviewStatus": "needs_review"
+    },
+    {
+      "id": "4e435366006991e195ab",
+      "title": "[서울지방중소벤처기업청 공고 제2026-25호] 여성기업 확인의 취소 공고",
+      "url": "https://www.mss.go.kr/site/seoul/ex/bbs/View.do?cbIdx=146&bcIdx=1066542",
+      "publishedAt": "2026-03-23",
+      "enterpriseTypes": [
+        "women"
+      ],
+      "kind": "cancellation_notice",
+      "sourceOffice": "서울지방중소벤처기업청",
+      "sourceId": "mss-seoul",
+      "attachments": [],
+      "reviewStatus": "needs_review"
+    },
+    {
+      "id": "db1fb33500bcf3a25fdf",
+      "title": "[서울지방중소벤처기업청 공고 제2026-13호] 여성기업 확인의 취소 공고",
+      "url": "https://www.mss.go.kr/site/seoul/ex/bbs/View.do?cbIdx=146&bcIdx=1065443",
+      "publishedAt": "2026-02-06",
+      "enterpriseTypes": [
+        "women"
+      ],
+      "kind": "cancellation_notice",
+      "sourceOffice": "서울지방중소벤처기업청",
+      "sourceId": "mss-seoul",
+      "attachments": [],
+      "reviewStatus": "needs_review"
+    },
+    {
+      "id": "5f6eaf58f4638f4c65f4",
+      "title": "장애인기업의 확인 취소 공고",
+      "url": "https://www.mss.go.kr/site/chungnam/ex/bbs/View.do?cbIdx=315&bcIdx=1065452",
+      "publishedAt": "2026-02-06",
+      "enterpriseTypes": [
+        "disabled"
+      ],
+      "kind": "cancellation_notice",
+      "sourceOffice": "충남지방중소벤처기업청",
+      "sourceId": "mss-chungnam",
+      "attachments": [],
+      "reviewStatus": "needs_review"
+    },
+    {
+      "id": "6cffbff5c7968aeee695",
+      "title": "여성기업의 확인 취소 공고",
+      "url": "https://www.mss.go.kr/site/chungnam/ex/bbs/View.do?cbIdx=315&bcIdx=1065450",
+      "publishedAt": "2026-02-06",
+      "enterpriseTypes": [
+        "women"
+      ],
+      "kind": "cancellation_notice",
+      "sourceOffice": "충남지방중소벤처기업청",
+      "sourceId": "mss-chungnam",
+      "attachments": [],
+      "reviewStatus": "needs_review"
+    },
+    {
+      "id": "454b429e46e29366f01a",
+      "title": "여성기업 확인서 발급 취소를 위한 청문 실시 공고",
+      "url": "https://www.mss.go.kr/site/gyeonggi/ex/bbs/View.do?cbIdx=247&bcIdx=1065135",
+      "publishedAt": "2026-01-29",
+      "enterpriseTypes": [
+        "women"
+      ],
+      "kind": "prior_notice",
+      "sourceOffice": "경기지방중소벤처기업청",
+      "sourceId": "mss-gyeonggi",
+      "attachments": [],
+      "reviewStatus": "needs_review"
+    },
+    {
+      "id": "8ea393d59b236d15cefa",
+      "title": "[서울지방중소벤처기업청 공고 제2026-8호] 여성기업 확인 취소 공고",
+      "url": "https://www.mss.go.kr/site/seoul/ex/bbs/View.do?cbIdx=146&bcIdx=1064995",
+      "publishedAt": "2026-01-22",
+      "enterpriseTypes": [
+        "women"
+      ],
+      "kind": "cancellation_notice",
+      "sourceOffice": "서울지방중소벤처기업청",
+      "sourceId": "mss-seoul",
+      "attachments": [],
+      "reviewStatus": "needs_review"
+    },
+    {
+      "id": "fa28b95e57404ba94f91",
+      "title": "장애인기업의 확인 취소를 위한 청문 실시 공고",
+      "url": "https://www.mss.go.kr/site/chungnam/ex/bbs/View.do?cbIdx=315&bcIdx=1064918",
+      "publishedAt": "2026-01-20",
+      "enterpriseTypes": [
+        "disabled"
+      ],
+      "kind": "prior_notice",
+      "sourceOffice": "충남지방중소벤처기업청",
+      "sourceId": "mss-chungnam",
+      "attachments": [],
+      "reviewStatus": "needs_review"
+    },
+    {
+      "id": "c80cd91a16a89dc9d793",
+      "title": "여성기업의 확인 취소를 위한 청문 실시 공고",
+      "url": "https://www.mss.go.kr/site/chungnam/ex/bbs/View.do?cbIdx=315&bcIdx=1064917",
+      "publishedAt": "2026-01-20",
+      "enterpriseTypes": [
+        "women"
+      ],
+      "kind": "prior_notice",
+      "sourceOffice": "충남지방중소벤처기업청",
+      "sourceId": "mss-chungnam",
+      "attachments": [],
+      "reviewStatus": "needs_review"
+    },
+    {
+      "id": "b961cec0dd1fd07aaf02",
+      "title": "장애인 표준사업장 인증 사업체 및 주요 생산품 현황(25년 12월말 기준)",
+      "url": "https://www.kead.or.kr/bbs/standardproduct/bbsView.do?bbsCnId=210253&menuId=MENU0697",
+      "publishedAt": "2026-01-14",
+      "enterpriseTypes": [
+        "standard"
+      ],
+      "kind": "status_update",
+      "sourceOffice": "한국장애인고용공단 표준사업장 자료실",
+      "sourceId": "kead-standard",
+      "attachments": [
+        {
+          "name": "표준사업장 현황(20251231 기준)(게시용_260319수정).xlsx",
+          "url": "https://www.kead.or.kr/cmm/fms/downloadDirect.do?key=D9A99318CE2FF0E8E3A4"
+        },
+        {
+          "name": "장애인_표준사업장_인증 취소업체_현황_251231(게시용).xlsx",
+          "url": "https://www.kead.or.kr/cmm/fms/downloadDirect.do?key=36DAEB498A76B44E0E8F"
+        }
+      ],
+      "reviewStatus": "needs_review"
+    },
+    {
+      "id": "129327e96ba4c6a3db73",
+      "title": "[공고] 여성기업 확인 취소를 위한 청문 실시 공시송달 공고",
+      "url": "https://www.mss.go.kr/site/seoul/ex/bbs/View.do?cbIdx=146&bcIdx=1064508",
+      "publishedAt": "2026-01-05",
+      "enterpriseTypes": [
+        "women"
+      ],
+      "kind": "prior_notice",
+      "sourceOffice": "서울지방중소벤처기업청",
+      "sourceId": "mss-seoul",
+      "attachments": [],
+      "reviewStatus": "needs_review"
+    }
+  ]
+}

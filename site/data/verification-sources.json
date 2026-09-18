@@ -1,0 +1,10 @@
+[
+ {"key":"sme","label":"중소기업","url":"https://www.smpp.go.kr/cop/middlsslentrschtwr/selectMiddlSslentrSchtwrListVw.do","service":"SMPP 중소기업 확인서 조회","help":"공공기관 계정 로그인 후 사업자번호로 확인서를 조회하세요. 유효기간과 확인서 발급 상태를 함께 확인합니다."},
+ {"key":"women","label":"여성기업","url":"https://www.smpp.go.kr/","service":"SMPP 여성기업 확인서 조회","help":"공공기관 로그인 → 확인서/증명서 정보 → 여성기업에서 사업자번호로 조회하세요."},
+ {"key":"disabled","label":"장애인기업","url":"https://www.smpp.go.kr/","service":"SMPP 장애인기업 확인서 조회","help":"공공기관 로그인 → 확인서/증명서 정보 → 장애인기업에서 사업자번호로 조회하세요."},
+ {"key":"startup","label":"창업기업","url":"https://cert.k-startup.go.kr/idndc/cnfrm/getListCnFrmn.do?tempValue=0401","service":"창업기업 확인서 진위확인","help":"업체가 제공한 확인서의 발급번호를 준비하세요. 확인서 진위와 유효기간을 대조합니다."},
+ {"key":"severe","label":"중증장애인생산품 생산시설","url":"https://www.goods.go.kr/pp/fc/facility/list.do?menuNo=5402000","service":"꿈드래 시설현황","help":"시설명으로 찾은 뒤 사업자번호·지정번호를 대조하고 지정품목과 기간을 확인하세요."},
+ {"key":"standard","label":"장애인표준사업장","url":"https://www.kead.or.kr/dpnrbSttus/dpnrbSttusPage.do?menuId=MENU0696","service":"한국장애인고용공단 표준사업장 현황","help":"사업체 정보를 대조하세요. 분기별 현황 이후의 인증·취소는 공단 공지사항에서 추가 확인합니다."},
+ {"key":"social","label":"사회적기업","url":"https://www.seis.or.kr/mainPage.do","service":"사회적기업 포털 SEIS","help":"기업정보 및 인증서에서 사업자번호·인증번호를 대조하고 최근 인증취소·반납 공고도 확인하세요."},
+ {"key":"cooperative","label":"사회적협동조합","url":"https://www.coop.go.kr/home/state/guildEstablish.do?menu_no=2032","service":"협동조합 설립현황","help":"조합명으로 찾아 법인·사업자번호 및 인가정보를 대조하세요. 현재 인가 효력은 소관 인가부처에서 확인합니다."}
+]

@@ -1,4 +1,4 @@
-name: Watch social enterprise cancellations
+name: Watch enterprise certification changes
 on:
   schedule:
     - cron: '23 23 * * *' # 08:23 Asia/Seoul; GitHub may delay scheduled runs.
@@ -28,18 +28,24 @@ jobs:
           cache-dependency-path: requirements-cancellation.txt
       - run: python -m pip install -r requirements-cancellation.txt
       - run: python -m unittest discover -s tests -p test_cancellations.py -v
+      - run: python -m unittest discover -s tests -p test_policy_changes.py -v
       - name: Read official notices
         run: python scripts/watch_cancellations.py
+      - name: Read additional official certification boards
+        run: python scripts/watch_policy_changes.py
       - name: Commit successful scan
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add site/data/cancellation-notices.json
+          git add site/data/cancellation-notices.json site/data/policy-notices.json
           if ! git diff --cached --quiet; then
-            git commit -m 'data: check social enterprise cancellation notices'
+            git commit -m 'data: check enterprise certification notices'
+            git pull --rebase origin main
             git push origin HEAD:main
           fi
       - uses: actions/configure-pages@v5
+      - name: Prepare progressive offer delivery
+        run: python scripts/build_offer_delivery.py
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

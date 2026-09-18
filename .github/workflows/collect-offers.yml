@@ -95,6 +95,8 @@ jobs:
           fi
       - uses: actions/configure-pages@v5
         if: inputs.publish
+      - name: Prepare progressive offer delivery
+        run: python scripts/build_offer_delivery.py
       - uses: actions/upload-pages-artifact@v3
         if: inputs.publish
         with:
