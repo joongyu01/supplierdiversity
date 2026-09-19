@@ -65,7 +65,15 @@ python scripts/collect_offers.py        # 가치장터 + 꿈드래 12개 대분�
 python scripts/build_offers_site.py
 ```
 
-API가 아니라 공개 상품 페이지를 읽습니다. 가치장터는 상품 상세 → 판매기업 소개의 사업자번호, 꿈드래는 상품 상세의 시설 사업자번호로만 명단과 연결합니다. 호스트별 요청 간격(`--interval`, 기본 0.35초), 재시도, 응답 캐시(`private/offer-cache/`)를 쓰므로 중단돼도 다시 실행하면 이어서 받습니다. 빠른 확인은 `--sepp-pages 1 --goods-pages 1 --goods-categories 화훼`, 최신 원문 재수집은 `--refresh`.
+API가 아니라 공개 상품 페이지를 읽습니다. 가치장터는 상품 상세 → 판매기업 소개의 사업자번호, 꿈드래는 상품 상세의 시설 사업자번호로만 명단과 연결합니다. 공개 구매 문의 연락처는 그대로 제공합니다.
+
+- 목록 페이지는 실행마다 다시 조회합니다. 상품·판매기업 상세 응답은 `private/offer-cache/`에 실제 조회 시각을 기록하고 **24시간 미만**일 때만 재사용합니다. `--cache-max-age-hours`로 유효시간을 조정하거나 `--refresh`로 모든 상세를 다시 받을 수 있습니다. 조회 시각이 없는 이전 형식 캐시도 재조회합니다.
+- 호스트별 요청 간격은 최소 0.35초이며 재시도에도 적용됩니다. 실패 후 재실행하면 아직 유효한 상세 캐시를 재사용합니다. `builtAt`은 수집 결과 생성일, 상품별 `observedAt`은 실제 원문 조회일입니다(한국시간). 캐시를 읽었다고 확인일을 오늘로 바꾸지 않습니다.
+- **전체 출처·분류의 목록과 상세가 모두 확보된 경우에만** `public-offers.jsonl`과 `collection-report.json`을 교체합니다. 일부 실패·목록 수 불일치·빈 결과는 실패 종료하고 직전 정상본을 유지합니다. `candidate-offers.jsonl`과 `collection-attempt.json`에 이번 성공분과 실패 원인을 별도로 남깁니다.
+- 빠른 확인에는 `--sepp-pages 1 --goods-pages 1 --goods-categories 화훼`를 쓸 수 있습니다. 범위를 제한한 결과도 진단 파일에 남지만, 전체 목록을 대체하지 못하도록 불완전 수집으로 종료됩니다. 바로 `build_offers_site.py`로 공개 결과를 만들지 않습니다.
+- `build_offers_site.py`도 수집 완료 여부·건수·원본 SHA-256을 다시 확인합니다. 중단으로 원본과 보고서가 서로 다른 실행 결과이거나 이전 형식 보고서만 있으면 공개 파일을 보존하고 실패합니다. 이때는 전체 수집부터 다시 실행합니다.
+
+GitHub Actions **Collect public offers**의 `refresh`를 켜면 유효한 상세 캐시도 재조회합니다. 회귀 테스트와 수집·빌드 검증을 통과해야 커밋·배포 단계로 진행합니다. 실패 시 **Collection report**와 실행 아티팩트의 `collection-attempt.json`을 확인합니다. 전체 원문을 다시 받는 작업은 수 시간 걸릴 수 있습니다.
 
 `site/data/offers.json`(schemaVersion 2)은 연락처를 업체당 한 번만 싣고 상품은 `[id, 상품명, 분류, 확인일, 연락처 번호]`로 압축합니다. 상품 URL은 ID로 복원합니다. 정규화 원본과 수집 보고서는 `data/offers/`(git 미추적)에 둡니다.
 
